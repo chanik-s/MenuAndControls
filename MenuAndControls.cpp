@@ -114,8 +114,6 @@ BOOL CMenuAndControlsApp::InitInstance()
 		nullptr);
 
 
-	CChildView::
-	
 
 
 	

@@ -17,6 +17,20 @@
 
 class CChildView : public CWnd
 {
+
+private:
+	//CRect m_rect;  // 사각형을 저장하는 멤버 변수
+	CPoint m_startPoint;  // 드래그 시작 지점을 저장하는 멤버 변수
+	bool m_isDrawingRect;  // 현재 사각형을 그리고 있는지 여부를 나타내는 플래그
+	// 새로운 멤버 변수 추가: 직사각형 정보를 저장하는 변수
+	CRect m_drawnRect;   // 그려진 직사각형의 정보를 저장
+	// 새로운 멤버 변수 추가: 직사각형 정보를 저장하는 변수
+	std::vector<CPoint> startv;   // 그려진 직사각형의 정보를 저장
+	std::vector<CPoint > endv;
+
+	std::vector<CRect> v_rect;
+	std::vector<std::pair<CPoint,int>> v_circle;
+
 public:
 	CChildView();
 
@@ -47,6 +61,8 @@ public:
 	// 고무벽 정보
 	CRect m_wall_rect{CPoint{}, CSize{20, 200}};
 
+	//벽 정보
+
 	void CalculateBall();
 
 public:
@@ -65,6 +81,8 @@ public:
 	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 
+	// 새로운 멤버 함수 추가: 직사각형 그리기 함수
+	void DrawRectangle(CDC* dc, CRect rect, COLORREF color);
 
 	enum TimerEvent {
 		kTimerClock,
