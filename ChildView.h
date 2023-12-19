@@ -23,13 +23,16 @@ private:
 	CPoint m_startPoint;  // 드래그 시작 지점을 저장하는 멤버 변수
 	bool m_isDrawingRect;  // 현재 사각형을 그리고 있는지 여부를 나타내는 플래그
 	// 새로운 멤버 변수 추가: 직사각형 정보를 저장하는 변수
-	CRect m_drawnRect;   // 그려진 직사각형의 정보를 저장
+	//CRect m_drawnRect;   // 그려진 직사각형의 정보를 저장
 	// 새로운 멤버 변수 추가: 직사각형 정보를 저장하는 변수
 	std::vector<CPoint> startv;   // 그려진 직사각형의 정보를 저장
 	std::vector<CPoint > endv;
 
 	std::vector<CRect> v_rect;
 	std::vector<std::pair<CPoint,int>> v_circle;
+	std::vector<std::pair<CPoint, CPoint> > v_line;
+	std::vector<std::pair<CPoint, CPoint> > v_curve;
+	std::vector<CRect> v_selarea;
 
 public:
 	CChildView();

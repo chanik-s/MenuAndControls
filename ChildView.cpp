@@ -12,6 +12,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -146,6 +147,29 @@ void Polygon(CDC* dc,
 	dc->SelectObject(pen_prev);
 }
 
+void DrawBezierCurve(CDC* dc, CPoint start, CPoint control1, CPoint control2, CPoint end, COLORREF color)
+{
+	CPen pen(PS_SOLID, 2, color);
+	dc->SelectObject(&pen);
+	
+
+	// 시작점
+	dc->MoveTo(start);
+
+	// Bezier 곡선 근사화를 위한 여러 선분
+	for (double t = 0.0; t <= 1.0; t += 0.01)
+	{
+		double u = 1.0 - t;
+		double x = u * u * u * start.x + 3 * u * u * t * control1.x + 3 * u * t * t * control2.x + t * t * t * end.x;
+		double y = u * u * u * start.y + 3 * u * u * t * control1.y + 3 * u * t * t * control2.y + t * t * t * end.y;
+
+		dc->LineTo(static_cast<int>(x), static_cast<int>(y));
+	}
+	
+}
+
+
+
 } // anonymous namespace
 
 // CChildView
@@ -255,6 +279,14 @@ afx_msg void CChildView::OnMyPaint(CDC* dc) {
 	//원
 	for (const auto& r : v_circle) {
 		Circle(dc, r.first, r.second, RGB(100, 0, 0));
+	}
+	//선
+	for (const auto& r : v_line) {
+		Line(dc,r.first,r.second);
+	}
+	//곡선
+	for (const auto& r : v_curve) {
+		DrawBezierCurve(dc, r.first, {r.first.x+200 ,r.first.y+200},{r.second.x-150,r.second.y-150}, r.second,RGB(100,200,40));
 	}
 
 	/*
@@ -373,7 +405,7 @@ void CChildView::OnMouseMove(UINT nFlags, CPoint point) {
 
 	m_mouse_event_listeners(kMouseMove, nFlags, point);
 
-	if (m_toolbar_mode == kToolbarDrawCircle && nFlags & MK_LBUTTON == 1) {
+	if (m_toolbar_mode == kToolbarDrawCircle && ((nFlags & MK_LBUTTON) == 1) ) {
 		v_circle.back().first.x = (point.x + m_startPoint.x) / 2;
 		v_circle.back().first.y = (point.y + m_startPoint.y) / 2;
 		v_circle.back().second = (point.x - m_startPoint.x) / 2;
@@ -384,17 +416,13 @@ void CChildView::OnMouseMove(UINT nFlags, CPoint point) {
 	//반지름
 	//(v_circle.end() - 1)->second = (point.x-m_startPoint.x)/2;
 
+	
 	CWnd::Invalidate();
 
 	CWnd::OnMouseMove(nFlags, point);
 
 }
-//추가
-void CChildView::DrawRectangle(CDC* dc, CRect rect, COLORREF color)
-{
-	CBrush brush(color);
-	dc->FillRect(rect, &brush);
-}
+
 
 void CChildView::OnLButtonDown(UINT nFlags, CPoint point) {
 	m_mouse_event_listeners(kMouseLButtonDown, nFlags, point);
@@ -405,7 +433,10 @@ void CChildView::OnLButtonDown(UINT nFlags, CPoint point) {
 	
 	m_startPoint = point;
 	
-	v_circle.push_back({ CPoint(m_startPoint.x,m_startPoint.y),3 }); //임시
+	if (m_toolbar_mode == kToolbarDrawCircle) {
+		v_circle.push_back({ CPoint(m_startPoint.x,m_startPoint.y),3 }); //임시
+	}
+
 
 	CWnd::Invalidate();
 	CWnd::OnLButtonDown(nFlags, point);
@@ -423,16 +454,50 @@ void CChildView::OnLButtonUp(UINT nFlags, CPoint point) {
 		// 그린 직사각형 정보 저장 (예: 벡터에 저장)
 		//endv.push_back(point);
 		//startv.push_back(m_startPoint);
-
 		v_rect.push_back(CRect(m_startPoint.x,m_startPoint.y,point.x,point.y) );
-		
-		
-
-
-		CWnd::Invalidate();
 	}
+
+	if (m_toolbar_mode == kToolbarDrawLine ) {
+		v_line.push_back({ m_startPoint,point });
+	}
+
+	if (m_toolbar_mode == kToolbarDrawCurve) {
+		v_curve.push_back({ m_startPoint,point });
+	}
+
+	if (m_toolbar_mode == kToolbarSelectArea) {
+		v_selarea.push_back(CRect(m_startPoint.x,m_startPoint.y,point.x,point.y) );
+
+		//선택 영역 직사각형
+		//원하는 객체가 영역 내에 있는지 검사
+		
+		/*
+		
+
+		if () {
+
+		}
+		*/
+	}
+
+	CWnd::Invalidate();
 	CWnd::OnLButtonUp(nFlags, point);
 }
+
+//추가
+bool isinArea(CPoint p1,CPoint p2) {
+
+	CPoint m1;
+	CPoint m2;
+
+	CPoint t1((std::min)(p1.x, p2.x),(std::min)(p1.y,p2.y) );
+	CPoint t2((std::max)(p1.x, p2.x), (std::max)(p1.y, p2.y));
+
+	return (t1.x <= m1.x && t1.y <= m1.y);
+
+	return false;
+}
+//
 
 void CChildView::OnLButtonDblClk(UINT nFlags, CPoint point) {
 	m_mouse_event_listeners(kMouseLButtonDblClk, nFlags, point);
@@ -520,6 +585,11 @@ void CChildView::OnUpdateDrawCurve(CCmdUI* pCmdUI) {
 
 void CChildView::OnRemoveSelected() {
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+	v_rect.clear();
+	v_line.clear();
+	v_circle.clear();
+	v_curve.clear();
+
 }
 
 
@@ -540,6 +610,9 @@ void CChildView::OnUpdateDrawCircle(CCmdUI* pCmdUI) {
 
 
 BOOL CChildView::OnEraseBkgnd(CDC* pDC) {
+	
+	//pDC->DeleteDC();
 	return TRUE;
 	// return CWnd::OnEraseBkgnd(pDC);
+
 }
