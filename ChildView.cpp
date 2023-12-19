@@ -222,7 +222,7 @@ void CChildView::OnPaint()
 	memDC.SelectObject(&bitmap);
 	memDC.Rectangle(0, 0, rect.Width(), rect.Height());
 
-	OnMyPaint(&memDC);
+	OnMyPaint(&memDC); //아래의 함수 호출
 
 	dc.BitBlt(0, 0, rect.Width(), rect.Height(), &memDC,
 						0, 0, SRCCOPY);

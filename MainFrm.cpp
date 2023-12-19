@@ -14,8 +14,11 @@
 
 // CMainFrame
 
+//CMainFrame 클래스는 CFrameWnd에서 파생
 IMPLEMENT_DYNAMIC(CMainFrame, CFrameWnd)
 
+//메시지 맵을 정의하여 Windows 메시지를 
+// CMainFrame 클래스의 멤버 함수와 연결
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_SETFOCUS()
@@ -34,6 +37,7 @@ static UINT indicators[] =
 CMainFrame::CMainFrame() noexcept
 {
 	// TODO: 여기에 멤버 초기화 코드를 추가합니다.
+
 }
 
 CMainFrame::~CMainFrame()
@@ -71,9 +75,14 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	EnableDocking(CBRS_ALIGN_ANY);
 	DockControlBar(&m_wndToolBar);
 
+
+	
+	
 	
 	return 0;
 }
+
+
 
 BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
@@ -119,3 +128,6 @@ BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO*
 	// 그렇지 않으면 기본 처리합니다.
 	return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
 }
+
+
+
